@@ -88,6 +88,61 @@ if 2019 in pivot.columns and 2023 in pivot.columns:
     st.write("Top 10 distritos que más disminuyeron")
     st.dataframe(top10_menos[columnas_mostrar].style.format("{:,.2f}"))
     st.bar_chart(top10_menos["DIF_2023_2019"])
+# Cargar datos
+df_residuos = pd.read_csv("BD_residuos_sólidos.csv", encoding='latin1', sep=';')
+
+# Titulo de la aplicacion
+st.title("Grafico circular: Produccion de Residuos Solidos por tipo, año y distrito")
+
+# Selectbox para elegir distrito
+distritos = df_residuos['DISTRITO'].unique()
+distrito_sel = st.selectbox("Selecciona un distrito", sorted(distritos))
+
+# Selectbox para elegir año
+años = df_residuos['PERIODO'].unique()
+año_sel = st.selectbox("Selecciona un año", sorted(años))
+
+# Filtrar el DataFrame por año y distrito seleccionados
+filtro = (df_residuos['DISTRITO'] == distrito_sel) & (df_residuos['PERIODO'] == año_sel)
+df_filtrado = df_residuos.loc[filtro]
+
+# Seleccionar columnas de residuos 
+columnas_residuos = [
+        "QRESIDUOS_ALIMENTOS", "QRESIDUOS_MALEZA", "QRESIDUOS_OTROS_ORGANICOS",
+        "QRESIDUOS_PAPEL_BLANCO", "QRESIDUOS_PAPEL_PERIODICO", "QRESIDUOS_PAPEL_MIXTO",
+        "QRESIDUOS_CARTON_BLANCO", "QRESIDUOS_CARTON_MARRON", "QRESIDUOS_CARTON_MIXTO",
+        "QRESIDUOS_VIDRIO_TRANSPARENTE", "QRESIDUOS_VIDRIO_OTROS_COLORES", "QRESIDUOS_VIDRIOS_OTROS",
+        "QRESIDUOS_TEREFLATO_POLIETILENO", "QRESIDUOS_POLIETILENO_ALTA_DENSIDAD",
+        "QRESIDUOS_POLIETILENO_BAJA_DENSIDAD", "QRESIDUOS_POLIPROPILENO", "QRESIDUOS_POLIESTIRENO",
+        "QRESIDUOS_POLICLORURO_VINILO", "QRESIDUOS_TETRABRICK", "QRESIDUOS_LATA",
+        "QRESIDUOS_METALES_FERROSOS", "QRESIDUOS_ALUMINIO", "QRESIDUOS_OTROS_METALES",
+        "QRESIDUOS_BOLSAS_PLASTICAS", "QRESIDUOS_SANITARIOS", "QRESIDUOS_PILAS",
+        "QRESIDUOS_TECNOPOR", "QRESIDUOS_INERTES", "QRESIDUOS_TEXTILES",
+        "QRESIDUOS_CAUCHO_CUERO", "QRESIDUOS_MEDICAMENTOS", "QRESIDUOS_ENVOLTURAS_SNAKCS_OTROS",
+        "QRESIDUOS_OTROS_NO_CATEGORIZADOS"
+    ]
+
+# Obtener solo las columnas de residuos
+residuos = df_filtrado[columnas_residuos].sum()
+
+# Crear nuevo DataFrame para el grafico
+df_grafico = pd.DataFrame({
+    "residuo": residuos.index,
+    "cantidad": residuos.values
+})
+
+# Convertir 'cantidad' a valores numÃ©ricos (por si acaso hay strings)
+df_grafico["cantidad"] = pd.to_numeric(df_grafico["cantidad"], errors="coerce")
+
+# Eliminar residuos vacÃ­os o negativos
+df_grafico = df_grafico[df_grafico["cantidad"] > 0]
+
+
+# Crear grÃ¡fico circular con Plotly
+fig = px.pie(df_grafico, values="cantidad", names="residuo",
+                 title=f"DistribuciÃ³n de residuos en {distrito_sel} ({año_sel})")
+st.plotly_chart(fig)
+
 
 
 
