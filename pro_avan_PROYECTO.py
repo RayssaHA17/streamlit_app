@@ -94,6 +94,7 @@ with col2:
 
 
 col1, col2, col3 = st.columns([1, 4, 1])
+with col2:
     st.title("Grafico circular: Produccion de Residuos Solidos por tipo, año y distrito")
 
     df_residuos = pd.read_csv("BD_residuos_sólidos.csv", encoding='latin1', sep=';')
