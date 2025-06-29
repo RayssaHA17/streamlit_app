@@ -5,9 +5,6 @@ import folium
 import plotly.express as px
 from folium.plugins import HeatMap
 from streamlit_folium import st_folium
-
-url_ubicacion = "https://raw.githubusercontent.com/RayssaHA17/streamlit_app/main/BD_ubicacion.csv"
-
 def center_text(text, is_header=False):
     col1, col2, col3 = st.columns([1, 8, 1])
     with col2:
@@ -41,7 +38,6 @@ with col2:
 def cargar_datos():
     df_residuos = pd.read_csv("BD_residuos_sólidos.csv", encoding='latin1', sep=';')
     df_ubicaciones = pd.read_csv("BD_ubicacion.csv", encoding='utf-8-sig', sep=';')
-    df.columns = df.columns.str.strip() 
     df_residuos.columns = df_residuos.columns.str.strip()
     df_ubicaciones.columns = df_ubicaciones.columns.str.strip()
     df = pd.merge(df_residuos, df_ubicaciones, on="DISTRITO", how="inner")
@@ -124,20 +120,20 @@ with col2:
     df_dep[residuo_analisis] = pd.to_numeric(df_dep[residuo_analisis], errors="coerce").fillna(0)
     pivot = df_dep.pivot_table(index="DISTRITO", columns="PERIODO", values=residuo_analisis, aggfunc="sum").fillna(0)
 
-    if 2019 in pivot.columns and 2023 in pivot.columns:
-        pivot["DIF_2023_2019"] = pivot[2023] - pivot[2019]
-        columnas_mostrar = [2019, 2023, "DIF_2023_2019"]
+    if 2019 in pivot.columns and 2022 in pivot.columns:
+        pivot["DIF_2022_2019"] = pivot[2022] - pivot[2019]
+        columnas_mostrar = [2019, 2022, "DIF_2022_2019"]
 
-        top10_mas = pivot.sort_values("DIF_2023_2019", ascending=False).head(10)
-        top10_menos = pivot.sort_values("DIF_2023_2019", ascending=True).head(10)
+        top10_mas = pivot.sort_values("DIF_2022_2019", ascending=False).head(10)
+        top10_menos = pivot.sort_values("DIF_2022_2019", ascending=True).head(10)
 
-        st.write("Top 10 distritos que más aumentaron")
+        st.write("Top 10 distritos que más aumentaron (2019 a 2022)")
         st.dataframe(top10_mas[columnas_mostrar].style.format("{:,.2f}"))
-        st.bar_chart(top10_mas["DIF_2023_2019"])
+        st.bar_chart(top10_mas["DIF_2022_2019"])
 
-        st.write("Top 10 distritos que más disminuyeron")
+        st.write("Top 10 distritos que más disminuyeron (2019 a 2022)")
         st.dataframe(top10_menos[columnas_mostrar].style.format("{:,.2f}"))
-        st.bar_chart(top10_menos["DIF_2023_2019"])
+        st.bar_chart(top10_menos["DIF_2022_2019"])
 
 
 
@@ -191,3 +187,4 @@ with col2:
     fig = px.pie(df_grafico, values="cantidad", names="residuo",
                  title=f"Distribucion de residuos en {distrito_sel} ({año_sel})")
     st.plotly_chart(fig, use_container_width=True)
+
