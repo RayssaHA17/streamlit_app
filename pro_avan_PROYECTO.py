@@ -136,22 +136,27 @@ elif opcion == "📈 Evaluación de Variación":
         st.bar_chart(top10_menos["DIF_2022_2019"])
 
 elif opcion == "🧩 Gráfico Circular":
+    #Titulo de la grafica
     st.header("Gráfico Circular de Composición de Residuos")
+    #reseña
     st.write("""
     Esta sección presenta gráficos circulares interactivos que muestran la composición porcentual de los diferentes tipos de residuos
     sólidos generados en un distrito y año específicos.Permite visualizar de manera clara y dinámica la participación relativa de cada
     fracción de residuo, facilitando la identificación de los residuos predominantes y apoyando la toma de decisiones para una gestión
     más focalizada y eficiente.
     """)
+    # Cargar datos
     df_residuos = pd.read_csv("BD_residuos_sólidos.csv", encoding='latin1', sep=';')
+    # Selectbox para elegir distrito
     distritos = df_residuos['DISTRITO'].unique()
     distrito_sel = st.selectbox("Selecciona un distrito", sorted(distritos))
+    # Selectbox para elegir años
     años = df_residuos['PERIODO'].unique()
     año_sel = st.selectbox("Selecciona un año", sorted(años))
-
+    # Filtrar el DataFrame por año y distrito seleccionados
     filtro = (df_residuos['DISTRITO'] == distrito_sel) & (df_residuos['PERIODO'] == año_sel)
     df_filtrado = df_residuos.loc[filtro]
-
+    # Seleccionar columnas de residuos 
     columnas_residuos = [
         "QRESIDUOS_ALIMENTOS", "QRESIDUOS_MALEZA", "QRESIDUOS_OTROS_ORGANICOS",
         "QRESIDUOS_PAPEL_BLANCO", "QRESIDUOS_PAPEL_PERIODICO", "QRESIDUOS_PAPEL_MIXTO",
@@ -166,12 +171,16 @@ elif opcion == "🧩 Gráfico Circular":
         "QRESIDUOS_CAUCHO_CUERO", "QRESIDUOS_MEDICAMENTOS", "QRESIDUOS_ENVOLTURAS_SNAKCS_OTROS",
         "QRESIDUOS_OTROS_NO_CATEGORIZADOS"
     ]
-
+    # Obtener solo las columnas de residuos
     residuos = df_filtrado[columnas_residuos].sum()
+    
+    # Crear nuevo DataFrame para el grafico
     df_grafico = pd.DataFrame({"residuo": residuos.index, "cantidad": residuos.values})
+    # Convertir 'cantidad' a valores numericos (por si acaso hay strings)
     df_grafico["cantidad"] = pd.to_numeric(df_grafico["cantidad"], errors="coerce")
+    # Eliminar residuos vacios o negativos
     df_grafico = df_grafico[df_grafico["cantidad"] > 0]
-
+    # Crear grafico circular con Plotly
     fig = px.pie(df_grafico, values="cantidad", names="residuo",
                  title=f"Distribución en {distrito_sel} ({año_sel})")
     st.plotly_chart(fig, use_container_width=True)
