@@ -126,6 +126,40 @@ elif opcion == "📊 Análisis Comparativo":
     st.bar_chart(resumen_distritos.set_index("Distrito"), use_container_width=True)
     
 #-------------------------------------------------------------------------------------------------------------
+elif opcion == "📈 Evaluación de Variación":
+    st.header("Evaluación de la Variación de Residuos (2019–2022)")
+    st.write("""
+    Esta evaluación considera si el volumen de residuos ha aumentado o disminuido ,
+    diferenciando entre zonas rurales y urbanas según el predominio de la población.
+    Como resultado ,se identifican los Top 10 distritos con mayor incremento y los
+    Top 10 con mayor disminución de residuos en el periodo, aportando una perspectiva
+    clara sobre los territorios que requieren mayor atención o que han logrado avances
+    en la gestión de residuos.
+    """)
+    departamento_sel = st.selectbox("Departamento", sorted(df["DEPARTAMENTO"].dropna().unique()), key="dep_variacion")
+    df_dep = df[df["DEPARTAMENTO"] == departamento_sel]
+    columnas_residuos = [col for col in df.columns if col.startswith("QRESIDUOS_") and col != "QRESIDUOS_DOM"]
+    residuo_analisis = st.selectbox("Selecciona el tipo de residuo a evaluar", columnas_residuos, key="residuo_variacion")
+
+    df_dep[residuo_analisis] = pd.to_numeric(df_dep[residuo_analisis], errors="coerce").fillna(0)
+    pivot = df_dep.pivot_table(index="DISTRITO", columns="PERIODO", values=residuo_analisis, aggfunc="sum").fillna(0)
+
+    if 2019 in pivot.columns and 2022 in pivot.columns:
+        pivot["DIF_2022_2019"] = pivot[2022] - pivot[2019]
+        columnas_mostrar = [2019, 2022, "DIF_2022_2019"]
+
+        top10_mas = pivot.sort_values("DIF_2022_2019", ascending=False).head(10)
+        top10_menos = pivot.sort_values("DIF_2022_2019", ascending=True).head(10)
+
+        st.subheader("Top 10 distritos que más aumentaron")
+        st.dataframe(top10_mas[columnas_mostrar].style.format("{:,.2f}"))
+        st.bar_chart(top10_mas["DIF_2022_2019"])
+
+        st.subheader("Top 10 distritos que más disminuyeron")
+        st.dataframe(top10_menos[columnas_mostrar].style.format("{:,.2f}"))
+        st.bar_chart(top10_menos["DIF_2022_2019"])
+        
+#--------------------------------------------------------------------------------------------------------------------------------
 
 elif opcion == "🧩 Gráfico Circular":
     #Titulo de la grafica
