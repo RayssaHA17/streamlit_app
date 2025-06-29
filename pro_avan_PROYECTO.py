@@ -23,7 +23,7 @@ def cargar_datos():
 
 df = cargar_datos()
 
-col1, col2, col3 = st.columns([0.5, 8, 0.5])  # Márgenes laterales y columna central ancha
+col1, col2, col3 = st.columns([1,4, 1)  # Márgenes laterales y columna central ancha
 with col2:
     st.header("Mapa de Calor de Residuos Sólidos")
     residuos_opciones = [col for col in df.columns if col.startswith("QRESIDUOS_")]
@@ -46,7 +46,7 @@ with col2:
     st_folium(mapa, use_container_width=True, height=350)
 
 
-col1, col2, col3 = st.columns([0.5, 8, 0.5])
+col1, col2, col3 = st.columns([1, 4, 1])
 with col2:
     st.header("Análisis Comparativo por tipos de residuos a nivel distrital, departamental y provincial")
 
@@ -93,8 +93,7 @@ with col2:
         st.bar_chart(top10_menos["DIF_2023_2019"])
 
 
-col1, col2, col3 = st.columns([0.5, 8, 0.5])
-with col2:
+col1, col2, col3 = st.columns(([1, 4, 1])
     st.title("Grafico circular: Produccion de Residuos Solidos por tipo, año y distrito")
 
     df_residuos = pd.read_csv("BD_residuos_sólidos.csv", encoding='latin1', sep=';')
