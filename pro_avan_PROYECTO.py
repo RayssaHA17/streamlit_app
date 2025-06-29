@@ -35,7 +35,7 @@ opcion = st.sidebar.radio("Ir a sección:", [
 
 
 if opcion == "📍 Mapa de Calor":
-    st.title("Análisis de Residuos Sólidos Domiciliarios en Perú (2019–2022)")
+    st.title("Análisis de Residuos Sólidos Domiciliarios en Perú (2019–2023)")
     st.markdown("**Presentado por: Rayssa Hidalgo y Matías Vidal**")
     st.write("""
     Este proyecto desarrolla una herramienta interactiva para analizar la generación y composición de residuos sólidos
