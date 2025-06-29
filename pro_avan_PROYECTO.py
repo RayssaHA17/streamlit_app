@@ -6,6 +6,8 @@ import plotly.express as px
 from folium.plugins import HeatMap
 from streamlit_folium import st_folium
 
+url_ubicacion = "https://raw.githubusercontent.com/RayssaHA17/streamlit_app/main/BD_ubicacion.csv"
+
 def center_text(text, is_header=False):
     col1, col2, col3 = st.columns([1, 8, 1])
     with col2:
@@ -39,6 +41,7 @@ with col2:
 def cargar_datos():
     df_residuos = pd.read_csv("BD_residuos_sólidos.csv", encoding='latin1', sep=';')
     df_ubicaciones = pd.read_csv("BD_ubicacion.csv", encoding='utf-8-sig', sep=';')
+    df.columns = df.columns.str.strip() 
     df_residuos.columns = df_residuos.columns.str.strip()
     df_ubicaciones.columns = df_ubicaciones.columns.str.strip()
     df = pd.merge(df_residuos, df_ubicaciones, on="DISTRITO", how="inner")
