@@ -6,10 +6,35 @@ import plotly.express as px
 from folium.plugins import HeatMap
 from streamlit_folium import st_folium
 
-st.set_page_config(page_title="Análisis de Residuos", layout="wide")
+def center_text(text, is_header=False):
+    col1, col2, col3 = st.columns([1, 8, 1])
+    with col2:
+        if is_header:
+            st.header(text)
+        else:
+            st.markdown(text)
+            
+center_text("Análisis de Residuos Sólidos Domiciliarios en Perú (2019-2023)", is_header=True)
 
-st.title("Análisis de Composición de residuos sólidos domiciliarios ")
+center_text("**Presentado por: Rayssa Hidalgo y Matías Vidal**")
+col1, col2, col3 = st.columns([1, 8, 1])
+with col2:
+    st.write("""
+    Este proyecto desarrolla una herramienta interactiva para analizar la generación y composición de residuos sólidos
+    domiciliarios en Perú( 2019 - 2023), utilizando datos oficiales. Mediante visualizaciones geoespaciales y gráficos dinámicos,
+    facilita la identificación de patrones regionales y temporales , apoyando la toma de decisiones para una gestión ambiental
+    sostenible y eficiente.
+    """)
+center_text("Objetivos Específicos", is_header=True)
 
+col1, col2, col3 = st.columns([1, 8, 1])
+with col2:
+    st.markdown("""
+    - Visualizar la intensidad de generación de residuos mediante mapas de calor interactivos.  
+    - Comparar la composición y volumen de residuos por tipo y región con filtros dinámicos.  
+    - Analizar la variación distrital de residuos entre zonas urbanas y rurales (2019-2022).  
+    - Mostrar la composición de residuos por distrito y año con gráficos circulares interactivos para apoyar decisiones.
+    """)
 @st.cache_data
 def cargar_datos():
     df_residuos = pd.read_csv("BD_residuos_sólidos.csv", encoding='latin1', sep=';')
@@ -23,9 +48,15 @@ def cargar_datos():
 
 df = cargar_datos()
 
-col1, col2, col3 = st.columns([1, 4, 1])  # Márgenes laterales y columna central ancha
+
+center_text("Mapa de Calor de Residuos Sólidos", is_header=True)
+col1, col2, col3 = st.columns([1, 8, 1])
 with col2:
-    st.header("Mapa de Calor de Residuos Sólidos")
+    st.write("""
+    Esta sección permite representar geográficamente la intensidad de generación de residuos sólidos domiciliarios
+    en el país.A través del uso del mapa de calor, los usuarios pueden observar visualmente qué distritos presentan
+    mayor o menor volumen de residuos según el tipo de residuo y el año seleccionado.
+    """)
     residuos_opciones = [col for col in df.columns if col.startswith("QRESIDUOS_")]
     residuo_sel = st.selectbox("Selecciona un tipo de residuo", sorted(residuos_opciones), key="residuo_mapa")
     años = df["PERIODO"].dropna().unique()
@@ -45,11 +76,14 @@ with col2:
     mapa = crear_mapa(df, residuo_sel, año_sel)
     st_folium(mapa, use_container_width=True, height=350)
 
-
-col1, col2, col3 = st.columns([1, 4, 1])
+center_text("Análisis Comparativo de Residuos Sólidos", is_header=True)
+col1, col2, col3 = st.columns([1, 8, 1])
 with col2:
-    st.header("Análisis Comparativo por tipos de residuos a nivel distrital, departamental y provincial")
-
+    st.write("""
+    Esta sección del proyecto permite examinar cómo varía la composición de residuos sólidos según el tipo (alimentarios,
+    plásticos, orgánicos, papel, cartón, entre otros) en distintos niveles administrativos del país.Esto permite observar
+    su volumen de generación y cómo se distribuye dentro de cada distrito.
+    """)
     departamento_sel = st.selectbox("Selecciona un departamento", sorted(df["DEPARTAMENTO"].dropna().unique()), key="dep_analisis")
     df_dep = df[df["DEPARTAMENTO"] == departamento_sel]
 
@@ -72,7 +106,17 @@ with col2:
     st.dataframe(resumen_distritos.style.format({"Toneladas": "{:,.2f}"}))
     st.bar_chart(resumen_distritos.set_index("Distrito"), use_container_width=True)
 
-    st.subheader("Evaluación Temporal de Residuos (2019–2023): Comparativa por Zonas y Ranking de Distritos")
+center_text("Evaluación de la Variación de Residuos", is_header=True)
+col1, col2, col3 = st.columns([1, 8, 1])
+with col2:
+    st.write("""
+    Esta evaluación considera si el volumen de residuos ha aumentado o disminuido ,
+    diferenciando entre zonas rurales y urbanas según el predominio de la población.
+    Como resultado ,se identifican los Top 10 distritos con mayor incremento y los
+    Top 10 con mayor disminución de residuos en el periodo, aportando una perspectiva
+    clara sobre los territorios que requieren mayor atención o que han logrado avances
+    en la gestión de residuos.
+    """)
 
     df_dep[residuo_analisis] = pd.to_numeric(df_dep[residuo_analisis], errors="coerce").fillna(0)
     pivot = df_dep.pivot_table(index="DISTRITO", columns="PERIODO", values=residuo_analisis, aggfunc="sum").fillna(0)
@@ -93,9 +137,17 @@ with col2:
         st.bar_chart(top10_menos["DIF_2023_2019"])
 
 
-col1, col2, col3 = st.columns([1, 4, 1])
+
+
+center_text("Gráfico Circular de Composición de Residuos", is_header=True)
+col1, col2, col3 = st.columns([1, 8, 1])
 with col2:
-    st.title("Grafico circular: Produccion de Residuos Solidos por tipo, año y distrito")
+    st.write("""
+    Esta sección presenta gráficos circulares interactivos que muestran la composición porcentual de los diferentes tipos de residuos
+    sólidos generados en un distrito y año específicos.Permite visualizar de manera clara y dinámica la participación relativa de cada
+    fracción de residuo, facilitando la identificación de los residuos predominantes y apoyando la toma de decisiones para una gestión
+    más focalizada y eficiente.
+    """)
 
     df_residuos = pd.read_csv("BD_residuos_sólidos.csv", encoding='latin1', sep=';')
 
@@ -136,12 +188,3 @@ with col2:
     fig = px.pie(df_grafico, values="cantidad", names="residuo",
                  title=f"Distribucion de residuos en {distrito_sel} ({año_sel})")
     st.plotly_chart(fig, use_container_width=True)
-
-
-
-
-
-
-
-
-
