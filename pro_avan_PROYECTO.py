@@ -93,7 +93,7 @@ with col2:
         st.bar_chart(top10_menos["DIF_2023_2019"])
 
 
-col1, col2, col3 = st.columns(([1, 4, 1])
+col1, col2, col3 = st.columns([1, 4, 1])
     st.title("Grafico circular: Produccion de Residuos Solidos por tipo, año y distrito")
 
     df_residuos = pd.read_csv("BD_residuos_sólidos.csv", encoding='latin1', sep=';')
