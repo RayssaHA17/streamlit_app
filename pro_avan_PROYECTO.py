@@ -23,7 +23,7 @@ def cargar_datos():
 
 df = cargar_datos()
 
-col1, col2, col3 = st.columns([1,4, 1)  # Márgenes laterales y columna central ancha
+col1, col2, col3 = st.columns([1, 4, 1])  # Márgenes laterales y columna central ancha
 with col2:
     st.header("Mapa de Calor de Residuos Sólidos")
     residuos_opciones = [col for col in df.columns if col.startswith("QRESIDUOS_")]
