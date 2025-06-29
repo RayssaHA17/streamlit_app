@@ -23,92 +23,92 @@ def cargar_datos():
 
 df = cargar_datos()
 
-st.header(" Mapa de Calor de Residuos Sólidos")
+col1, col2, col3 = st.columns([0.5, 8, 0.5])  # Márgenes laterales y columna central ancha
+with col2:
+    st.header("Mapa de Calor de Residuos Sólidos")
+    residuos_opciones = [col for col in df.columns if col.startswith("QRESIDUOS_")]
+    residuo_sel = st.selectbox("Selecciona un tipo de residuo", sorted(residuos_opciones), key="residuo_mapa")
+    años = df["PERIODO"].dropna().unique()
+    año_sel = st.selectbox("Selecciona un año", sorted(años), key="año_mapa")
 
-residuos_opciones = [col for col in df.columns if col.startswith("QRESIDUOS_")]
-residuo_sel = st.selectbox("Selecciona un tipo de residuo", sorted(residuos_opciones), key="residuo_mapa")
+    def crear_mapa(df, residuo, año):
+        mapa = folium.Map(location=[-9.19, -75.02], zoom_start=5)
+        df_filtrado = df[df["PERIODO"] == año]
+        df_filtrado["latitud"] = pd.to_numeric(df_filtrado["latitud"], errors="coerce")
+        df_filtrado["longitud"] = pd.to_numeric(df_filtrado["longitud"], errors="coerce")
+        df_filtrado[residuo] = pd.to_numeric(df_filtrado[residuo], errors="coerce")
+        df_filtrado = df_filtrado.dropna(subset=["latitud", "longitud", residuo])
+        heat_data = df_filtrado[["latitud", "longitud", residuo]].values.tolist()
+        HeatMap(heat_data, radius=15).add_to(mapa)
+        return mapa
 
-años = df["PERIODO"].dropna().unique()
-año_sel = st.selectbox("Selecciona un año", sorted(años), key="año_mapa")
-
-def crear_mapa(df, residuo, año):
-    mapa = folium.Map(location=[-9.19, -75.02], zoom_start=5)
-    df_filtrado = df[df["PERIODO"] == año]
-    df_filtrado["latitud"] = pd.to_numeric(df_filtrado["latitud"], errors="coerce")
-    df_filtrado["longitud"] = pd.to_numeric(df_filtrado["longitud"], errors="coerce")
-    df_filtrado[residuo] = pd.to_numeric(df_filtrado[residuo], errors="coerce")
-    df_filtrado = df_filtrado.dropna(subset=["latitud", "longitud", residuo])
-    heat_data = df_filtrado[["latitud", "longitud", residuo]].values.tolist()
-    HeatMap(heat_data, radius=15).add_to(mapa)
-    return mapa
-
-mapa = crear_mapa(df, residuo_sel, año_sel)
-st_folium(mapa, use_container_width=True, height=350)
-
-st.header("Análisis Comparativo por tipos de residuos a nivel distrital, departamental y provincial")
-
-departamento_sel = st.selectbox("Selecciona un departamento", sorted(df["DEPARTAMENTO"].dropna().unique()), key="dep_analisis")
-df_dep = df[df["DEPARTAMENTO"] == departamento_sel]
-
-provincia_sel = st.selectbox("Selecciona una provincia", sorted(df_dep["PROVINCIA"].dropna().unique()), key="prov_analisis")
-df_prov = df_dep[df_dep["PROVINCIA"] == provincia_sel]
-
-año_comp = st.selectbox("Selecciona el año a analizar", sorted(df_prov["PERIODO"].dropna().unique()), key="año_analisis")
-df_prov = df_prov[df_prov["PERIODO"] == año_comp]
-
-columnas_residuos = [col for col in df.columns if col.startswith("QRESIDUOS_") and col != "QRESIDUOS_DOM"]
-residuo_analisis = st.selectbox("Selecciona el tipo de residuo a analizar", columnas_residuos, key="residuo_analisis")
-
-df_prov[residuo_analisis] = pd.to_numeric(df_prov[residuo_analisis], errors="coerce")
-
-st.subheader("Comparación de residuos por distrito")
-resumen_distritos = df_prov.groupby("DISTRITO")[residuo_analisis].sum().reset_index()
-resumen_distritos.columns = ["Distrito", "Toneladas"]
-resumen_distritos = resumen_distritos.sort_values("Toneladas", ascending=False)
-
-st.dataframe(resumen_distritos.style.format({"Toneladas": "{:,.2f}"}))
-st.bar_chart(resumen_distritos.set_index("Distrito"), use_container_width=True)
+    mapa = crear_mapa(df, residuo_sel, año_sel)
+    st_folium(mapa, use_container_width=True, height=350)
 
 
-st.subheader("Evaluación Temporal de Residuos (2019–2023): Comparativa por Zonas y Ranking de Distritos")
+col1, col2, col3 = st.columns([0.5, 8, 0.5])
+with col2:
+    st.header("Análisis Comparativo por tipos de residuos a nivel distrital, departamental y provincial")
 
-df_dep[residuo_analisis] = pd.to_numeric(df_dep[residuo_analisis], errors="coerce").fillna(0)
-pivot = df_dep.pivot_table(index="DISTRITO", columns="PERIODO", values=residuo_analisis, aggfunc="sum").fillna(0)
+    departamento_sel = st.selectbox("Selecciona un departamento", sorted(df["DEPARTAMENTO"].dropna().unique()), key="dep_analisis")
+    df_dep = df[df["DEPARTAMENTO"] == departamento_sel]
 
-if 2019 in pivot.columns and 2023 in pivot.columns:
-    pivot["DIF_2023_2019"] = pivot[2023] - pivot[2019]
-    columnas_mostrar = [2019, 2023, "DIF_2023_2019"]
+    provincia_sel = st.selectbox("Selecciona una provincia", sorted(df_dep["PROVINCIA"].dropna().unique()), key="prov_analisis")
+    df_prov = df_dep[df_dep["PROVINCIA"] == provincia_sel]
 
-    top10_mas = pivot.sort_values("DIF_2023_2019", ascending=False).head(10)
-    top10_menos = pivot.sort_values("DIF_2023_2019", ascending=True).head(10)
+    año_comp = st.selectbox("Selecciona el año a analizar", sorted(df_prov["PERIODO"].dropna().unique()), key="año_analisis")
+    df_prov = df_prov[df_prov["PERIODO"] == año_comp]
 
-    st.write("Top 10 distritos que más aumentaron")
-    st.dataframe(top10_mas[columnas_mostrar].style.format("{:,.2f}"))
-    st.bar_chart(top10_mas["DIF_2023_2019"])
+    columnas_residuos = [col for col in df.columns if col.startswith("QRESIDUOS_") and col != "QRESIDUOS_DOM"]
+    residuo_analisis = st.selectbox("Selecciona el tipo de residuo a analizar", columnas_residuos, key="residuo_analisis")
 
-    st.write("Top 10 distritos que más disminuyeron")
-    st.dataframe(top10_menos[columnas_mostrar].style.format("{:,.2f}"))
-    st.bar_chart(top10_menos["DIF_2023_2019"])
-# Cargar datos
-df_residuos = pd.read_csv("BD_residuos_sólidos.csv", encoding='latin1', sep=';')
+    df_prov[residuo_analisis] = pd.to_numeric(df_prov[residuo_analisis], errors="coerce")
 
-# Titulo de la aplicacion
-st.title("Grafico circular: Produccion de Residuos Solidos por tipo, año y distrito")
+    st.subheader("Comparación de residuos por distrito")
+    resumen_distritos = df_prov.groupby("DISTRITO")[residuo_analisis].sum().reset_index()
+    resumen_distritos.columns = ["Distrito", "Toneladas"]
+    resumen_distritos = resumen_distritos.sort_values("Toneladas", ascending=False)
 
-# Selectbox para elegir distrito
-distritos = df_residuos['DISTRITO'].unique()
-distrito_sel = st.selectbox("Selecciona un distrito", sorted(distritos))
+    st.dataframe(resumen_distritos.style.format({"Toneladas": "{:,.2f}"}))
+    st.bar_chart(resumen_distritos.set_index("Distrito"), use_container_width=True)
 
-# Selectbox para elegir año
-años = df_residuos['PERIODO'].unique()
-año_sel = st.selectbox("Selecciona un año", sorted(años))
+    st.subheader("Evaluación Temporal de Residuos (2019–2023): Comparativa por Zonas y Ranking de Distritos")
 
-# Filtrar el DataFrame por año y distrito seleccionados
-filtro = (df_residuos['DISTRITO'] == distrito_sel) & (df_residuos['PERIODO'] == año_sel)
-df_filtrado = df_residuos.loc[filtro]
+    df_dep[residuo_analisis] = pd.to_numeric(df_dep[residuo_analisis], errors="coerce").fillna(0)
+    pivot = df_dep.pivot_table(index="DISTRITO", columns="PERIODO", values=residuo_analisis, aggfunc="sum").fillna(0)
 
-# Seleccionar columnas de residuos 
-columnas_residuos = [
+    if 2019 in pivot.columns and 2023 in pivot.columns:
+        pivot["DIF_2023_2019"] = pivot[2023] - pivot[2019]
+        columnas_mostrar = [2019, 2023, "DIF_2023_2019"]
+
+        top10_mas = pivot.sort_values("DIF_2023_2019", ascending=False).head(10)
+        top10_menos = pivot.sort_values("DIF_2023_2019", ascending=True).head(10)
+
+        st.write("Top 10 distritos que más aumentaron")
+        st.dataframe(top10_mas[columnas_mostrar].style.format("{:,.2f}"))
+        st.bar_chart(top10_mas["DIF_2023_2019"])
+
+        st.write("Top 10 distritos que más disminuyeron")
+        st.dataframe(top10_menos[columnas_mostrar].style.format("{:,.2f}"))
+        st.bar_chart(top10_menos["DIF_2023_2019"])
+
+
+col1, col2, col3 = st.columns([0.5, 8, 0.5])
+with col2:
+    st.title("Grafico circular: Produccion de Residuos Solidos por tipo, año y distrito")
+
+    df_residuos = pd.read_csv("BD_residuos_sólidos.csv", encoding='latin1', sep=';')
+
+    distritos = df_residuos['DISTRITO'].unique()
+    distrito_sel = st.selectbox("Selecciona un distrito", sorted(distritos))
+
+    años = df_residuos['PERIODO'].unique()
+    año_sel = st.selectbox("Selecciona un año", sorted(años))
+
+    filtro = (df_residuos['DISTRITO'] == distrito_sel) & (df_residuos['PERIODO'] == año_sel)
+    df_filtrado = df_residuos.loc[filtro]
+
+    columnas_residuos = [
         "QRESIDUOS_ALIMENTOS", "QRESIDUOS_MALEZA", "QRESIDUOS_OTROS_ORGANICOS",
         "QRESIDUOS_PAPEL_BLANCO", "QRESIDUOS_PAPEL_PERIODICO", "QRESIDUOS_PAPEL_MIXTO",
         "QRESIDUOS_CARTON_BLANCO", "QRESIDUOS_CARTON_MARRON", "QRESIDUOS_CARTON_MIXTO",
@@ -123,26 +123,20 @@ columnas_residuos = [
         "QRESIDUOS_OTROS_NO_CATEGORIZADOS"
     ]
 
-# Obtener solo las columnas de residuos
-residuos = df_filtrado[columnas_residuos].sum()
+    residuos = df_filtrado[columnas_residuos].sum()
 
-# Crear nuevo DataFrame para el grafico
-df_grafico = pd.DataFrame({
-    "residuo": residuos.index,
-    "cantidad": residuos.values
-})
+    df_grafico = pd.DataFrame({
+        "residuo": residuos.index,
+        "cantidad": residuos.values
+    })
 
-# Convertir 'cantidad' a valores numÃ©ricos (por si acaso hay strings)
-df_grafico["cantidad"] = pd.to_numeric(df_grafico["cantidad"], errors="coerce")
+    df_grafico["cantidad"] = pd.to_numeric(df_grafico["cantidad"], errors="coerce")
+    df_grafico = df_grafico[df_grafico["cantidad"] > 0]
 
-# Eliminar residuos vacÃ­os o negativos
-df_grafico = df_grafico[df_grafico["cantidad"] > 0]
+    fig = px.pie(df_grafico, values="cantidad", names="residuo",
+                 title=f"Distribucion de residuos en {distrito_sel} ({año_sel})")
+    st.plotly_chart(fig, use_container_width=True)
 
-
-# Crear grÃ¡fico circular con Plotly
-fig = px.pie(df_grafico, values="cantidad", names="residuo",
-                 title=f"DistribuciÃ³n de residuos en {distrito_sel} ({año_sel})")
-st.plotly_chart(fig)
 
 
 
