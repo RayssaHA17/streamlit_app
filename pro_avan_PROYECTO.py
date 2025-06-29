@@ -161,7 +161,7 @@ elif opcion == "📈 Evaluación de Variación de Residuos (2019–2022":
         
 #--------------------------------------------------------------------------------------------------------------------------------
 
-elif opcion == "🧩 Gráfico Circular: Produccion de Residuos Solidos por tipo, año y distrito"):
+elif opcion == "🧩 Gráfico Circular: Produccion de Residuos Solidos por tipo, año y distrito":
     #Titulo de la grafica
     st.header("Gráfico Circular de Composición de Residuos")
     #reseña
