@@ -24,15 +24,15 @@ df = cargar_datos()
 # Barra lateral de navegación
 st.sidebar.title("Navegación")
 opcion = st.sidebar.radio("Ir a sección:", [
-    "📍 Mapa de Calor",
-    "📊 Análisis Comparativo",
-    "📈 Evaluación de Variación",
-    "🧩 Gráfico Circular"
+    "📍 Mapa de Calor de Residuos Sólidos",
+    "📊 Análisis Comparativo de Residuos",
+    "📈 Evaluación de Variación de Residuos (2019–2022)",
+    "🧩 Gráfico Circular de Composición de Residuos"
 ])
 
 #---------------------------------------------------------------------------------------------------------------------------
 
-if opcion == "📍 Mapa de Calor":
+if opcion == "📍 Mapa de Calor de Residuos Sólidos":
     
     st.title("Análisis de Residuos Sólidos Domiciliarios en Perú (2019–2022)")
     
@@ -98,7 +98,7 @@ if opcion == "📍 Mapa de Calor":
     mapa = crear_mapa(df)
     st_folium(mapa, width=700, height=500)
 #---------------------------------------------------------------------------------------------------------------
-elif opcion == "📊 Análisis Comparativo":
+elif opcion == "📊 Análisis Comparativo de Residuos":
     st.header("Análisis Comparativo de Residuos")
     st.write("""
     Esta sección del proyecto permite examinar cómo varía la composición de residuos sólidos según el tipo (alimentarios,
@@ -126,7 +126,7 @@ elif opcion == "📊 Análisis Comparativo":
     st.bar_chart(resumen_distritos.set_index("Distrito"), use_container_width=True)
     
 #-------------------------------------------------------------------------------------------------------------
-elif opcion == "📈 Evaluación de Variación:
+elif opcion == "📈 Evaluación de Variación de Residuos (2019–2022)":
     st.header("Evaluación de la Variación de Residuos (2019–2022)")
     st.write("""
     Esta evaluación considera si el volumen de residuos ha aumentado o disminuido ,
@@ -161,7 +161,7 @@ elif opcion == "📈 Evaluación de Variación:
         
 #--------------------------------------------------------------------------------------------------------------------------------
 
-elif opcion == "🧩 Gráfico Circular":
+elif opcion == "🧩 Gráfico Circular de Composición de Residuos":
     #Titulo de la grafica
     st.header("Gráfico Circular de Composición de Residuos")
     #reseña
