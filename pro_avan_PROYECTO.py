@@ -98,7 +98,7 @@ if opcion == "📍 Mapa de Calor":
     mapa = crear_mapa(df)
     st_folium(mapa, width=700, height=500)
 #---------------------------------------------------------------------------------------------------------------
-elif opcion == "📊 Análisis Comparativo  de Residuos":
+elif opcion == "📊 Análisis Comparativo":
     st.header("Análisis Comparativo de Residuos")
     st.write("""
     Esta sección del proyecto permite examinar cómo varía la composición de residuos sólidos según el tipo (alimentarios,
@@ -126,7 +126,7 @@ elif opcion == "📊 Análisis Comparativo  de Residuos":
     st.bar_chart(resumen_distritos.set_index("Distrito"), use_container_width=True)
     
 #-------------------------------------------------------------------------------------------------------------
-elif opcion == "📈 Evaluación de Variación de Residuos (2019–2022":
+elif opcion == "📈 Evaluación de Variación:
     st.header("Evaluación de la Variación de Residuos (2019–2022)")
     st.write("""
     Esta evaluación considera si el volumen de residuos ha aumentado o disminuido ,
@@ -161,7 +161,7 @@ elif opcion == "📈 Evaluación de Variación de Residuos (2019–2022":
         
 #--------------------------------------------------------------------------------------------------------------------------------
 
-elif opcion == "🧩 Gráfico Circular: Produccion de Residuos Solidos por tipo, año y distrito":
+elif opcion == "🧩 Gráfico Circular":
     #Titulo de la grafica
     st.header("Gráfico Circular de Composición de Residuos")
     #reseña
